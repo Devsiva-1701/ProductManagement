@@ -1,0 +1,4 @@
+2,milk,4343,12dev1P2,0,12,dev,Diary,true,
+1,sam,323,12dev1P1,0,32,dev,Electronics,true,
+4,dress,4343,12dev1P4,0,43,dev,Fashion,true,
+3,nike,5454,12dev1P3,0,43,dev,Fashion,true,
