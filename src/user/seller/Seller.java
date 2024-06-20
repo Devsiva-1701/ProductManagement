@@ -4,6 +4,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
+import org.bson.Document;
+
+import com.mongodb.client.result.DeleteResult;
+
+import Mongo.ClientConnect;
 import product.*;
 
 public class Seller extends SellerProduct implements SellerInterface , SellerProductUpdate {
@@ -38,20 +43,19 @@ public class Seller extends SellerProduct implements SellerInterface , SellerPro
     }
 
     @Override
-    public void updatePrice( String prod_ID ) {
+    public void updatePrice( String prod_ID , ClientConnect client ) {
 
         try {
 
-            HashMap<String , Product> ProductlibraryMap = prod_lib.getLibrary();
-        
-        if( ProductlibraryMap.containsKey(prod_ID) )
-        {
+            Document docs  = new Document("ProductID" ,prod_ID);
+
+            Document producDocument = client.getProductCollection().find().filter(docs).first();
+
             boolean validPrice = false;
             
-            int productprice;
-            product = ProductlibraryMap.get(prod_ID);
-            productprice = product.getProd_price();
-            System.out.println("The current price of the product : "+product.getProd_name()+" is "+productprice);
+            int productprice; 
+            productprice = producDocument.getInteger("Price");
+            System.out.println("The current price of the product : "+producDocument.getString("ProductName")+" is "+productprice);
             while(!validPrice)
             {
                 System.out.println("Enter the new price of the product : ");
@@ -61,21 +65,17 @@ public class Seller extends SellerProduct implements SellerInterface , SellerPro
                     System.out.println("Enter a valid price...");
                 }
                 else{
-                    product.setProd_price(productprice);
-                    prod_lib.addProductToLibrary(product);
-                    System.out.println("Price for the Product : "+product.getProd_name()+" updated as "+ 
-                                        product.getProd_price() +" successfuly...");
+                    Document updateProdDoc = new  Document("$set" , new Document("Price" , productprice));
+                    client.getProductCollection().updateOne(producDocument, updateProdDoc);
+                    System.out.println("Price for the Product : "+producDocument.getString("ProductName")+" updated as "+ 
+                                        productprice +" successfuly...");
                     validPrice = true;
                 }
                 
             }
             
             
-        }
-        else
-        {
-            System.out.println("Product is not available...");
-        }
+        
             
         } catch (NullPointerException lib_null) {
             System.err.println("No Products avail in the store...");
@@ -86,74 +86,68 @@ public class Seller extends SellerProduct implements SellerInterface , SellerPro
     }
 
     @Override
-    public void udpateAdditonOfStock( String prod_ID ) {
+    public void udpateAdditonOfStock( String prod_ID , ClientConnect client ) {
 
         try {
 
-            HashMap<String , Product> ProductlibraryMap = prod_lib.getLibrary();
-        boolean validValue = false;
+            Document docs  = new Document("ProductID" ,prod_ID);
 
-        if(ProductlibraryMap.containsKey(prod_ID))
-        {
-            int stockValue;
-            product = ProductlibraryMap.get(prod_ID);
-            stockValue = product.getProd_stock();
-            System.out.println("The Current stock value of the product : "+product.getProd_name()+" is "+stockValue);
-            while( !validValue )
-            {
-                int stockValueNew;
-                System.out.println("Enter the stock value to be added : ");
-                stockValueNew = input.nextInt();
-                if( stockValueNew < 0 )
+            Document producDocument = client.getProductCollection().find().filter(docs).first();
+            boolean validValue = false;
+
+            
+                int stockValue;
+                stockValue = producDocument.getInteger("Stock");
+                System.out.println("The Current stock value of the product : "+producDocument.getString("ProductName")+" is "+stockValue);
+                while( !validValue )
                 {
-                    System.out.println( "You can't add a negative value for stock addition try positive values..." );
+                    int stockValueNew;
+                    System.out.println("Enter the stock value to be added : ");
+                    stockValueNew = input.nextInt();
+                    if( stockValueNew < 0 )
+                    {
+                        System.out.println( "You can't add a negative value for stock addition try positive values..." );
+                    }
+                    // else if( stockValue+stockValueNew > 100 )
+                    // {
+                    //     System.out.println("Our Platform doesn't allow same producted to be stocked more that 100 please refer terms and conditions...");
+                    // }
+                    else
+                    {
+                        Document updateProdDoc = new  Document("$set" , new Document("Stock" , stockValue+stockValueNew));
+                        client.getProductCollection().updateOne(producDocument, updateProdDoc);
+                        // product.setProd_Visibility(true);
+                        System.out.println("Stock for the Product : "+producDocument.getString("ProductName")+" updated as "+ 
+                                        String.valueOf(stockValue+stockValueNew) +" successfuly...");
+                        validValue = true;
+                    }
                 }
-                // else if( stockValue+stockValueNew > 100 )
-                // {
-                //     System.out.println("Our Platform doesn't allow same producted to be stocked more that 100 please refer terms and conditions...");
-                // }
-                else
-                {
-                    product.setProd_stock(stockValue+stockValueNew);
-                    product.setProd_Visibility(true);
-                    prod_lib.addProductToLibrary(product);
-                    addSellerProducts();
-                    System.out.println("Stock for the Product : "+product.getProd_name()+" updated as "+ 
-                                        product.getProd_stock() +" successfuly...");
-                    validValue = true;
-                }
+
+                // input.close();
+                
+
+              
+                
+            } catch (NullPointerException lib_null) {
+                System.err.println("No Products avail in the store...");
             }
-
-            // input.close();
-            
-
-        }
-        else
-        {
-            System.out.println("The product is not available...");
-        }   
-            
-        } catch (NullPointerException lib_null) {
-            System.err.println("No Products avail in the store...");
-        }
           
         
     }
 
     @Override
-    public void updateSubtractionOfStock( String prod_ID ) {
+    public void updateSubtractionOfStock( String prod_ID , ClientConnect client ) {
 
         try {
 
-            HashMap<String , Product> ProductlibraryMap = prod_lib.getLibrary();
-        boolean validValue = false;
+            Document docs  = new Document("ProductID" ,prod_ID);
 
-        if(ProductlibraryMap.containsKey(prod_ID))
-        {
+            Document producDocument = client.getProductCollection().find().filter(docs).first();
+            boolean validValue = false;
+
             int stockValue;
-            product = ProductlibraryMap.get(prod_ID);
-            stockValue = product.getProd_stock();
-            System.out.println("The Current stock value of the product : "+product.getProd_name()+" is "+stockValue);
+            stockValue = producDocument.getInteger("Stock");
+            System.out.println("The Current stock value of the product : "+producDocument.getString("ProductName")+" is "+stockValue);
             while( !validValue )
             {
                 int stockValueNew;
@@ -173,15 +167,15 @@ public class Seller extends SellerProduct implements SellerInterface , SellerPro
                 }
                 else
                 {
-                    product.setProd_stock(stockValue + stockValueNew);
-                    if( product.getProd_stock() == 0 ){
-                        product.setProd_Visibility(false);
-                        System.out.println("This product visiblity is turned off until the stocks have been restored...");
-                    }
-                    prod_lib.addProductToLibrary(product);
-                    addSellerProducts();
-                    System.out.println("Stock for the Product : "+product.getProd_name()+" updated as "+ 
-                                        product.getProd_stock() +" successfuly...");
+
+                    Document updateProdDoc = new  Document("$set" , new Document("Stock" , stockValue+stockValueNew));
+                    client.getProductCollection().updateOne(producDocument, updateProdDoc);
+                    // if( product.getProd_stock() == 0 ){
+                    //     product.setProd_Visibility(false);
+                    //     System.out.println("This product visiblity is turned off until the stocks have been restored...");
+                    // }
+                    System.out.println("Stock for the Product : "+producDocument.getString("ProductName")+" updated as "+ 
+                                        String.valueOf(stockValue+stockValueNew) +" successfuly...");
                     validValue = true;
                 }
             }
@@ -189,11 +183,7 @@ public class Seller extends SellerProduct implements SellerInterface , SellerPro
             // input.close();
             
 
-        }
-        else
-        {
-            System.out.println("The product is not available...");
-        }
+        
             
         } catch (NullPointerException lib_null) {
             System.err.println("No Products avail in the store...");
@@ -349,18 +339,14 @@ public class Seller extends SellerProduct implements SellerInterface , SellerPro
     }
 
     @Override
-    void deleteProductFromStore(String prod_ID) {
+    void deleteProductFromStore(String prod_ID , ClientConnect client) {
 
         try {
 
-            HashMap<String ,Product> temp_lib = prod_lib.getLibrary();
-            removedSellerProducts.put(prod_ID , temp_lib.get(prod_ID) );
-            sellerProducts.remove(prod_ID);
-            removed_prod_lib.addProductToLibrary(temp_lib.get(prod_ID));
-            prod_lib.deleteProductToLibrary(prod_ID);
+            Document filter  = new Document("ProductID" ,prod_ID);
+            DeleteResult result = client.getProductCollection().deleteOne(filter);
 
-            System.err.println("From seller : "+prod_lib.getLibrary());
-            System.err.println("From seller : "+ removed_prod_lib.getLibrary());
+            // sellerProducts.remove(prod_ID);
             
         } catch (NullPointerException lib_null) {
             System.err.println("No Products avail in the store...");

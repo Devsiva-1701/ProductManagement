@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
+import Mongo.ClientConnect;
 import product.Product;
 import product.ProductCategories;
 import product.ProductsLibrary;
@@ -30,9 +31,12 @@ public class Console {
     Seller currentSeller;
     public static transient Scanner input = new Scanner(System.in);
     File file;
+    ClientConnect clientConnect;
 
-    public Console() {
+    public Console( ClientConnect clientConnect ) {
+        this.clientConnect = clientConnect;
         running = true;
+        clientConnect.insertCategoriesIntoCollection();
     }
 
     void verifyFile()
@@ -279,7 +283,7 @@ public class Console {
 
                 customer_ID = (customer_phNo.toString() + customer_name + String.valueOf(CustomerPrimaryID));
 
-                customer_DB.setUser(new Customer(customer_name, customer_pass, customer_address, new HashMap<String, Integer>(), customer_ID, CustomerPrimaryID , String.valueOf(customer_phNo)));
+                customer_DB.setUser(new Customer( clientConnect , customer_name, customer_pass, customer_address, new HashMap<String, Integer>(), customer_ID, CustomerPrimaryID , String.valueOf(customer_phNo)));
 
                 if (customer_DB.existingUser(customer_ID)) {
                     System.out.println("User already exists...");
@@ -361,7 +365,7 @@ public class Console {
                     System.out.println("Incorrect Password...");
                 } else {
                     System.out.println("Login In Successful...");
-                    CustomerConsole customerConsole = new CustomerConsole(removedCustomer_DB, customer_DB, 
+                    CustomerConsole customerConsole = new CustomerConsole(clientConnect, removedCustomer_DB, customer_DB, 
                     seller_DB, currentCustomer, prod_library);
                     customerConsole.start_customer_console();
                     running = false;
@@ -384,7 +388,7 @@ public class Console {
                     System.out.println("Incorrect Password...");
                 } else {
                     System.out.println("Login In Successful...");
-                    SellerConsole sellerConsole = new SellerConsole(removedSeller_DB, seller_DB, 
+                    SellerConsole sellerConsole = new SellerConsole( clientConnect , removedSeller_DB, seller_DB, 
                     removed_prod_lib, currentSeller, prod_library);
                     sellerConsole.start_seller_console(input);
                     running = false;

@@ -97,6 +97,7 @@ public class Product implements Serializable {
 
     public String getDetails() {
         return
+                "Product {" + '\n' +
                 "primary_id : " + Primary_ID + '\n' +
                 "prod_name : " + prod_name + '\n' +
                 "prod_price : " + prod_price + '\n' +
@@ -104,7 +105,7 @@ public class Product implements Serializable {
                 "prod_rating : " + prod_rating + '\n' +
                 "prod_stock : " + prod_stock + '\n' +
                 "seller : " + seller + '\n' +
-                "category : " + category + '\n' ;
+                "category : " + category + '\n' + "}" ;
                 
     }
 

@@ -3,9 +3,17 @@ package user.seller;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.Scanner;
 
+import org.bson.codecs.jsr310.LocalTimeCodec;
+
+import com.mongodb.MongoClient;
+
+import Mongo.ClientConnect;
 import product.Product;
 import product.ProductCategories;
 import product.ProductsLibrary;
@@ -20,9 +28,10 @@ public class SellerConsole {
     private boolean seller_active = true;
     private ProductsLibrary prod_lib;
     private RemovedProductsLibrary removed_prod_lib;
+    ClientConnect client;
     // private Product product;
 
-    public SellerConsole( 
+    public SellerConsole( ClientConnect client ,
         RemovedUsers<Seller> removed_seller_DB , Users<Seller> seller_DB, RemovedProductsLibrary removed_prod_lib ,
      Seller current_seller , ProductsLibrary prod_lib )
     {
@@ -31,6 +40,7 @@ public class SellerConsole {
         this.prod_lib = prod_lib;
         this.seller_DB = seller_DB;
         this.removed_prod_lib = removed_prod_lib;
+        this.client = client;
     }
 
     public void start_seller_console( Scanner input )
@@ -45,7 +55,7 @@ public class SellerConsole {
             switch(option)
             {
                 case 1:
-                    current_seller.viewAllProducts();
+                    current_seller.viewAllProducts( client , current_seller.getSeller_ID() );
                     break;
                 
                 case 2:
@@ -53,31 +63,34 @@ public class SellerConsole {
                     System.out.println("Enter the product ID : ");
                     prod_ID_Single = input.nextLine();
                     prod_ID_Single = input.nextLine();
-                    current_seller.viewProduct(prod_ID_Single);
+                    current_seller.viewProduct(prod_ID_Single , client);
                     break;
 
                 case 3:
+                    client.getProductLibrary_Mongo();
                     String prod_ID_Price;
                     System.out.println("Enter the product ID : ");
                     prod_ID_Price = input.nextLine();
                     prod_ID_Price = input.nextLine();
-                    current_seller.updatePrice(prod_ID_Price);   
+                    current_seller.updatePrice(prod_ID_Price , client);   
                     break;
                     
                 case 4:
+                    client.getProductLibrary_Mongo();
                     String prod_ID_StockAdd;
                     System.out.println("Enter the product ID : ");
                     prod_ID_StockAdd = input.nextLine();
                     prod_ID_StockAdd = input.nextLine();
-                    current_seller.udpateAdditonOfStock(prod_ID_StockAdd);
+                    current_seller.udpateAdditonOfStock(prod_ID_StockAdd , client);
                     break;
 
                 case 5:
+                    client.getProductLibrary_Mongo();
                     String prod_ID_StockSub;
                     System.out.println("Enter the product ID : ");
                     prod_ID_StockSub = input.nextLine();
                     prod_ID_StockSub = input.nextLine();
-                    current_seller.updateSubtractionOfStock(prod_ID_StockSub);
+                    current_seller.updateSubtractionOfStock(prod_ID_StockSub , client);
                     break;
 
                 case 6:
@@ -85,11 +98,12 @@ public class SellerConsole {
                     break;
 
                 case 7:
+                    client.getProductLibrary_Mongo();
                     String prod_ID_delete;
                     System.out.println("Enter the product ID : ");
                     prod_ID_delete = input.nextLine();
                     prod_ID_delete = input.nextLine();
-                    current_seller.deleteProductFromStore(prod_ID_delete);
+                    current_seller.deleteProductFromStore(prod_ID_delete , client);
                     break;
 
                 case 8:
@@ -209,69 +223,17 @@ public class SellerConsole {
             }
         }
 
-        if( removed_prod_lib.getLibrary().isEmpty() )
-        {
-            if( prod_lib.getLibrary().isEmpty() )
-            {
-                Primary_ID_1 = 1;
-            }
-            else
-            {
-                int loop = 1;
-                for( Map.Entry<String , Product> product_entry : prod_lib.getLibrary().entrySet() )
-                {
-                    if( loop == prod_lib.getLibrary().size() ) {
-                        Primary_ID_1 = loop+1;
-                        System.err.println("Setting ths Value...");
-                    }
-                    loop++;
-                }
-            }
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("mm-ss-SS");
 
-        }
-        else
-        {
-                for( Map.Entry<String , Product> removed_product_entry : removed_prod_lib.getLibrary().entrySet() )
-                {
-                    Primary_ID_1 = removed_product_entry.getValue().getPrimaryID();
-                    removed_prod_lib.deleteProductToLibrary(removed_product_entry.getValue());
-                    break;
-                }
-        }
+         LocalTime currentTime = LocalTime.now();
 
-        // This is for primary_2 which takes reference from seller DB
-
-        // if( current_seller.getRemovedSellerProd().isEmpty() )
-        // {
-        //     if( current_seller.getSellerProducts().isEmpty() )
-        //     {
-        //         Primary_ID_2 = 1;
-        //     }
-        //     else
-        //     {
-        //         int loop = 1;
-        //         for( Map.Entry<String , Product> seller_product_entry : current_seller.getSellerProducts().entrySet() )
-        //         {
-        //             if( loop == prod_lib.getLibrary().size()-1 ) Primary_ID_2 = seller_product_entry.getValue().getPrimaryID();
-        //             loop++;
-        //         }
-        //     }
-
-        // }
-        // else
-        // {
-        //         for( Map.Entry<String , Product> removed_seller_product_entry : current_seller.getRemovedSellerProd().entrySet() )
-        //         {
-        //             Primary_ID_2 = removed_seller_product_entry.getValue().getPrimaryID();
-        //             current_seller.deleteRemovedSellerProducts(removed_seller_product_entry.getKey());
-        //             break;
-        //         }
-        // }
-
-        current_seller.addProductToStore(new Product( Primary_ID_1 , prod_name , 
-        prod_price ,(prod_ID+"P"+String.valueOf(Primary_ID_1)),
+        Product product = new Product( Primary_ID_1 , prod_name , 
+        prod_price ,(prod_ID+"P"+currentTime.format(formatter)),
         prod_rating , prod_stock , current_seller.getName() , current_seller.getSeller_ID() , category , true
-        ));
+        );
+
+        client.insertIntoCollection(product);
+        current_seller.addProductToStore(product);
         current_seller.addSellerProducts();
 
         System.out.println("Product Added to the Store Successfully...");

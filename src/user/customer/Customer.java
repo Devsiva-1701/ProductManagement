@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
+import Mongo.ClientConnect;
+
 public class Customer implements CustomerInterface , CustomerCartUpdate{
 
     private String customer_name;
@@ -21,8 +23,9 @@ public class Customer implements CustomerInterface , CustomerCartUpdate{
     private HashMap< String , HashMap<String , Integer>> purchase_history = new HashMap<String , HashMap<String ,Integer>>();
     private ProductsLibrary prod_lib;
     private Seller seller;
+    ClientConnect clientConnect;
 
-    public Customer(String customer_name , String customer_password , String customer_address ,
+    public Customer(ClientConnect clientConnect ,String customer_name , String customer_password , String customer_address ,
                     HashMap<String , Integer> customer_cart , String customer_ID , int primary_ID , String customer_PhNo )
     {
         this.customer_name = customer_name;
@@ -32,6 +35,7 @@ public class Customer implements CustomerInterface , CustomerCartUpdate{
         this.customer_ID = customer_ID;
         this.primary_ID = primary_ID;
         this.customer_PhNo = customer_PhNo;
+        this.clientConnect = clientConnect;
     }
 
 

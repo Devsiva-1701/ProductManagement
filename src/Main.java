@@ -1,15 +1,13 @@
-import com.mongodb.MongoClient;
 
+import Mongo.ClientConnect;
 
 public class Main {
     public static void main(String[] args) {
 
-        MongoClient client = new MongoClient( "localhost" , 27017 );
-        System.out.println("Client Connected Successfully...");
+        ClientConnect clientConnect = new ClientConnect();
+        clientConnect.connect();
 
-
-
-        Console console_1 = new Console();
+        Console console_1 = new Console( clientConnect );
         console_1.startConsole();
     }
 }

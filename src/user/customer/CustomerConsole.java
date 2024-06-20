@@ -6,6 +6,7 @@ import java.util.InputMismatchException;
 import java.util.Map;
 import java.util.Scanner;
 
+import Mongo.ClientConnect;
 import product.Product;
 import product.ProductsLibrary;
 import user.RemovedUsers;
@@ -19,8 +20,9 @@ public class CustomerConsole {
     private Customer current_customer;
     private boolean customer_active = true;
     private ProductsLibrary prod_lib;
+    ClientConnect clientConnect;
 
-    public CustomerConsole( 
+    public CustomerConsole( ClientConnect clientConnect,
         RemovedUsers<Customer> removed_customer_DB , Users<Customer>  customer_DB, Users<Seller> seller_DB ,
      Customer current_customer , ProductsLibrary prod_lib )
     {
@@ -29,6 +31,7 @@ public class CustomerConsole {
         this.prod_lib = prod_lib;
         this.customer_DB = customer_DB;
         this.seller_DB = seller_DB;
+        this.clientConnect = clientConnect;
     }
 
     public void start_customer_console()
@@ -49,7 +52,8 @@ public class CustomerConsole {
             switch(option)
             {
                 case 1:
-                    current_customer.viewProducts(prod_lib);
+                    clientConnect.getProductLibrary_Mongo();
+                    // current_customer.viewProducts(prod_lib);
                     break;
                 
                 case 2:
