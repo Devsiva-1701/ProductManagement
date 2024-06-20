@@ -361,7 +361,8 @@ public class Console {
                     System.out.println("Incorrect Password...");
                 } else {
                     System.out.println("Login In Successful...");
-                    CustomerConsole customerConsole = new CustomerConsole(removedCustomer_DB, customer_DB, seller_DB, currentCustomer, prod_library);
+                    CustomerConsole customerConsole = new CustomerConsole(removedCustomer_DB, customer_DB, 
+                    seller_DB, currentCustomer, prod_library);
                     customerConsole.start_customer_console();
                     running = false;
                 }
@@ -383,7 +384,8 @@ public class Console {
                     System.out.println("Incorrect Password...");
                 } else {
                     System.out.println("Login In Successful...");
-                    SellerConsole sellerConsole = new SellerConsole(removedSeller_DB, seller_DB, removed_prod_lib, currentSeller, prod_library);
+                    SellerConsole sellerConsole = new SellerConsole(removedSeller_DB, seller_DB, 
+                    removed_prod_lib, currentSeller, prod_library);
                     sellerConsole.start_seller_console(input);
                     running = false;
                 }

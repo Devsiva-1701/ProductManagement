@@ -1,8 +1,12 @@
 package user.customer;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.util.InputMismatchException;
+import java.util.Map;
 import java.util.Scanner;
 
+import product.Product;
 import product.ProductsLibrary;
 import user.RemovedUsers;
 import user.Users;
@@ -33,7 +37,8 @@ public class CustomerConsole {
         while( customer_active )
         {
             int option = 0;
-            System.out.println(" Enter the options (number) : \n 1.View Products \n 2.View Cart \n 3.Add product to cart \n 4.Delete product from cart \n 5.Purchase Product \n 6.LogOut \n 7.Delete Account");
+            System.out.println(" Enter the options (number) : \n 1.View Products \n 2.View Cart \n 3.Add product to cart \n 4.Delete product from cart \n 5.Purchase Product \n 6.LogOut \n" + //
+                                " 7.Show PurchaseHistory \n 8.Delete Account");
             try{
                 option = input.nextInt();
                 input.nextLine();
@@ -67,20 +72,71 @@ public class CustomerConsole {
                     String prod_ID_Delete;
                     System.out.println("Enter the product ID : ");
                     prod_ID_Delete = input.nextLine();
-                    prod_ID_Delete = input.nextLine();
-                    current_customer.deleteProduct(prod_ID_Delete);
+                    current_customer.deleteProduct(prod_ID_Delete , input);
                     break;
 
                 case 5:
-                
+
                     current_customer.purchaseProduct();
                     break;
 
                 case 6:
+                    // try 
+                    // {
+                    //     System.err.println("From console : "+prod_lib.getLibrary());
+                    //     // System.err.println("From console : "+ removed_prod_lib.getLibrary());
+                    //     BufferedWriter writer = new BufferedWriter( new FileWriter("customer.txt") );
+
+                    //     for( Map.Entry<String , Customer> customer_entry : customer_DB.getDB().entrySet() )
+                    //     {
+                    //         System.err.println(customer_DB.getDB());
+                    //         Customer customerFromMap = customer_entry.getValue();
+                    //         System.out.println(customerFromMap.getSellerDetailsFile());
+                    //         writer.write( sellerFromMap.getSellerDetailsFile());
+                    //         System.out.println("Writing in customer");
+                    //         writer.newLine();
+                    //     }
+                    //     writer.close();
+                    //     BufferedWriter writer_2 = new BufferedWriter(new FileWriter("products.txt"));
+                        
+                    //     if(!prod_lib.getLibrary().isEmpty())
+                    //     {
+                    //         for( Map.Entry<String , Product> product_entry : prod_lib.getLibrary().entrySet() )
+                    //         {
+                    //             Product productFromMap = product_entry.getValue();
+                    //             writer_2.write( productFromMap.getDetailsFile());
+                    //             writer_2.newLine();
+                    //         }
+                    //     }
+                        
+                    //     writer_2.close();
+                    //     BufferedWriter writer_3 = new BufferedWriter(new FileWriter("removed_products.txt"));
+                        
+                    //     if(!removed_prod_lib.getLibrary().isEmpty())
+                    //     {
+                    //         for(Map.Entry<String ,Product> removed_prod_entry : removed_prod_lib.getLibrary().entrySet() )
+                    //         {
+                    //             Product productFromMap = removed_prod_entry.getValue();
+                    //             writer_3.write( productFromMap.getDetailsFile() );
+                    //             System.out.println("Writing in removed prod");
+                    //             writer_3.newLine();
+                    //         }
+                    //     }
+                    //     writer_3.close();
+                    //     System.out.println("File Created...");
+                        
+                    // } catch (Exception e) {
+                    //     System.err.println("File creation failed...");
+                    //     e.printStackTrace();
+                    // }
                     customer_active = false;
                     break;
 
                 case 7:
+                    current_customer.showPurchaseHistory();
+                    break;
+
+                case 8:
                     removed_customer_DB.addRemovedUser(current_customer.getCustomer_ID());
                     customer_DB.deleteUser(current_customer.getCustomer_ID());
                     System.out.println("Your Account has been deleted..");
