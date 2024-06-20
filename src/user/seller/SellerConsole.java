@@ -161,7 +161,7 @@ public class SellerConsole {
             
         }
 
-        input.close();
+        // input.close();
         
     }
 
@@ -270,7 +270,7 @@ public class SellerConsole {
 
         current_seller.addProductToStore(new Product( Primary_ID_1 , prod_name , 
         prod_price ,(prod_ID+"P"+String.valueOf(Primary_ID_1)),
-        prod_rating , prod_stock , current_seller.getName() , category , true
+        prod_rating , prod_stock , current_seller.getName() , current_seller.getSeller_ID() , category , true
         ));
         current_seller.addSellerProducts();
 

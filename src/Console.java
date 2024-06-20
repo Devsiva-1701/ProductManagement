@@ -65,7 +65,7 @@ public class Console {
             {
                 String[] part_prod = line.split(",");
                 boolean visiblity;
-                if(part_prod[8].equals("true"))
+                if(part_prod[9].equals("true"))
                 {
                     visiblity = true;
                 }
@@ -74,8 +74,8 @@ public class Console {
                 }
                 prod_library.addProductToLibrary(
                     new Product(Integer.parseInt(part_prod[0]), part_prod[1], Integer.parseInt(part_prod[2]), 
-                    part_prod[3], Byte.parseByte(part_prod[4]), Integer.parseInt(part_prod[5]), part_prod[6], 
-                    ProductCategories.valueOf(part_prod[7]), visiblity));
+                    part_prod[3], Byte.parseByte(part_prod[4]), Integer.parseInt(part_prod[5]), part_prod[6], part_prod[7] , 
+                    ProductCategories.valueOf(part_prod[8]), visiblity));
             }
 
         }
@@ -104,8 +104,8 @@ public class Console {
                 }
                 removed_prod_lib.addProductToLibrary(
                     new Product(Integer.parseInt(part_prod[0]), part_prod[1], Integer.parseInt(part_prod[2]), 
-                    part_prod[3], Byte.parseByte(part_prod[4]), Integer.parseInt(part_prod[5]), part_prod[6], 
-                    ProductCategories.valueOf(part_prod[7]), visiblity));
+                    part_prod[3], Byte.parseByte(part_prod[4]), Integer.parseInt(part_prod[5]), part_prod[6], part_prod[7] ,
+                    ProductCategories.valueOf(part_prod[8]), visiblity));
             }
 
         }
@@ -279,7 +279,7 @@ public class Console {
 
                 customer_ID = (customer_phNo.toString() + customer_name + String.valueOf(CustomerPrimaryID));
 
-                customer_DB.setUser(new Customer(customer_name, customer_pass, customer_address, new HashMap<String, Integer>(), customer_ID, CustomerPrimaryID));
+                customer_DB.setUser(new Customer(customer_name, customer_pass, customer_address, new HashMap<String, Integer>(), customer_ID, CustomerPrimaryID , String.valueOf(customer_phNo)));
 
                 if (customer_DB.existingUser(customer_ID)) {
                     System.out.println("User already exists...");
@@ -361,7 +361,7 @@ public class Console {
                     System.out.println("Incorrect Password...");
                 } else {
                     System.out.println("Login In Successful...");
-                    CustomerConsole customerConsole = new CustomerConsole(removedCustomer_DB, customer_DB, currentCustomer, prod_library);
+                    CustomerConsole customerConsole = new CustomerConsole(removedCustomer_DB, customer_DB, seller_DB, currentCustomer, prod_library);
                     customerConsole.start_customer_console();
                     running = false;
                 }

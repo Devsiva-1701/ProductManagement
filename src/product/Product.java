@@ -11,12 +11,13 @@ public class Product implements Serializable {
     private byte prod_rating;
     private int prod_stock;
     private String seller;
+    private String sellerID;
     private ProductCategories category;
     private boolean isVisible;
 
 
     public Product(int Primary_ID , String prod_name, int prod_price, String prod_id,
-                   byte prod_rating, int prod_stock, String seller,
+                   byte prod_rating, int prod_stock, String seller, String sellerID ,
                    ProductCategories category , boolean isVisible) {
 
         this.Primary_ID = Primary_ID;
@@ -26,6 +27,7 @@ public class Product implements Serializable {
         this.prod_rating = prod_rating;
         this.prod_stock = prod_stock;
         this.seller = seller;
+        this.sellerID = sellerID;
         this.category = category;
         this.isVisible = isVisible;
 
@@ -84,6 +86,11 @@ public class Product implements Serializable {
         return seller;
     }
 
+    public String getSellerID()
+    {
+        return sellerID;
+    }
+
     public ProductCategories getCategory() {
         return category;
     }
@@ -110,6 +117,7 @@ public class Product implements Serializable {
                 prod_rating + ','  +
                 prod_stock + ','  +
                 seller + ','  +
+                sellerID + ','  +
                 category.toString()+','+ 
                 (isVisible ? "true" : "false") + ',' ;
                 

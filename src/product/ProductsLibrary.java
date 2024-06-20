@@ -32,6 +32,7 @@ public class ProductsLibrary implements Serializable {
 
     public String getProductName( String productID )
     {
+        System.err.println(products_library);
         return products_library.get(productID).getProd_name();
     }
 

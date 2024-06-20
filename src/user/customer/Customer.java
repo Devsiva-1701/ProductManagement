@@ -16,20 +16,21 @@ public class Customer implements CustomerInterface , CustomerCartUpdate{
     private String customer_password;
     private String customer_address;
     private String customer_PhNo;
-    protected Map< String , Integer > customer_cart;
-    private Map< String , HashMap<String , Integer>> purchase_history;
+    protected HashMap< String , Integer > customer_cart;
+    private Map< String , HashMap<String , Integer>> purchase_history = new HashMap<String , HashMap<String ,Integer>>();
     private ProductsLibrary prod_lib;
     private Seller seller;
 
     public Customer(String customer_name , String customer_password , String customer_address ,
-                    HashMap<String , Integer> customer_cart , String customer_ID , int primary_ID )
+                    HashMap<String , Integer> customer_cart , String customer_ID , int primary_ID , String customer_PhNo )
     {
         this.customer_name = customer_name;
         this.customer_password = customer_password;
         this.customer_address = customer_address;
-        this.customer_cart = (HashMap<String , Integer>) customer_cart;
+        this.customer_cart = customer_cart;
         this.customer_ID = customer_ID;
         this.primary_ID = primary_ID;
+        this.customer_PhNo = customer_PhNo;
     }
 
 
@@ -82,12 +83,12 @@ public class Customer implements CustomerInterface , CustomerCartUpdate{
 
             try {
 
-                customer_cart.put( (product.getProd_id()+ getCustomer_PhNo()) ,
-                    customer_cart.getOrDefault(product.getProd_id()+getCustomer_PhNo() , 0) + quantity
-                    );
+                addToCustomeCart(product , quantity);
+
+                    System.err.println(customer_cart);
 
                 System.out.println("Product : " + product.getProd_name() +" added to your cart...");
-                input.close();
+//                input.close();
                 
             } catch (Exception e) {
                 System.err.println("The cart is empty try to add products to your cart...");
@@ -96,8 +97,16 @@ public class Customer implements CustomerInterface , CustomerCartUpdate{
             
             } catch (Exception e) {
                 System.err.println("There is no product available...");
+                e.printStackTrace();
             }
         
+    }
+
+    public void addToCustomeCart( Product product , int quantity )
+    {
+        customer_cart.put( (product.getProd_id()) ,
+                    customer_cart.getOrDefault(product.getProd_id()+getCustomer_PhNo() , 0) + quantity
+                    );
     }
 
     @Override
@@ -127,34 +136,51 @@ public class Customer implements CustomerInterface , CustomerCartUpdate{
     }
 
 
-    public void setSeller(Seller seller) {
-        this.seller = seller;
+    public void setSeller(Seller prod_seller) {
+        System.err.println("The seller inside the customer : "+seller);
+        seller = prod_seller;
+    }
+
+    public Seller getSeller()
+    {
+        return seller;
     }
 
 
     @Override
-    public void viewCart( ProductsLibrary prod_lib ) {
+    public void viewCart( ProductsLibrary prod_lib) {
 
         try{
-            if(customer_cart.isEmpty()) throw new NumberFormatException("Null");
-            for( Map.Entry<String , Integer> product : customer_cart.entrySet())
+            if(customer_cart.isEmpty()) {
+                System.err.println("Cart is Empty...");
+            }
+            else
+            {
+                for( Map.Entry<String , Integer> product : customer_cart.entrySet())
             {
                 System.out.println("Product_id : "+product.getKey()+"\n"+
                         "Product_Name" + prod_lib.getProductName( product.getKey() )+"\n"+
                         "Number of this items in the cart : " + product.getValue()
                 );
             }
+            }
+            
         }
         catch(Exception e)
         {
             System.err.println("The cart is empty try to add products to your cart...");
+            e.printStackTrace();
         }
 
 
     }
 
-    @Override 
-    public void purchaseProduct()
+    public HashMap<String , Integer> getCustomerCart()
+    {
+        return this.customer_cart;
+    }
+
+    public void purchaseProduct( )
     {
         boolean success = false;
 
@@ -162,6 +188,7 @@ public class Customer implements CustomerInterface , CustomerCartUpdate{
             if(customer_cart.isEmpty()) throw new Exception();
             for( Map.Entry<String , Integer> cartProducts : customer_cart.entrySet()  )
             {
+                System.err.println(getSeller());
                 HashMap<String , Product> product_DB = prod_lib.getLibrary();
                 HashMap<String , Product> seller_prod_DB = seller.getSellerProducts();
                 if(product_DB.containsKey(cartProducts.getKey()))
@@ -176,10 +203,11 @@ public class Customer implements CustomerInterface , CustomerCartUpdate{
                     }
                 }
             }
-            System.out.println("Changing the success...");
+            System.out.println("Changing the success variable...");
             success = true;
         } catch (Exception e) {
             System.err.println("The cart is empty try to add products to your cart...");
+            e.printStackTrace();
             success = false;
         }
 
