@@ -1,13 +1,9 @@
 package user.customer;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.util.InputMismatchException;
-import java.util.Map;
 import java.util.Scanner;
 
 import Mongo.ClientConnect;
-import product.Product;
 import product.ProductsLibrary;
 import user.RemovedUsers;
 import user.Users;
@@ -81,7 +77,7 @@ public class CustomerConsole {
 
                 case 5:
 
-                    current_customer.purchaseProduct();
+                    current_customer.purchaseProduct( clientConnect );
                     break;
 
                 case 6:

@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
+import org.bson.Document;
+
 import Mongo.ClientConnect;
 
 public class Customer implements CustomerInterface , CustomerCartUpdate{
@@ -277,7 +279,7 @@ public class Customer implements CustomerInterface , CustomerCartUpdate{
         return this.customer_cart;
     }
 
-    public void purchaseProduct( )
+    public void purchaseProduct( ClientConnect client )
     {
         boolean success = false;
 
@@ -285,19 +287,27 @@ public class Customer implements CustomerInterface , CustomerCartUpdate{
             if(customer_cart.isEmpty()) throw new Exception();
             for( Map.Entry<String , Integer> cartProducts : customer_cart.entrySet()  )
             {
-                System.err.println(getSeller());
-                HashMap<String , Product> product_DB = prod_lib.getLibrary();
-                HashMap<String , Product> seller_prod_DB = seller.getSellerProducts();
-                if(product_DB.containsKey(cartProducts.getKey()))
+                // HashMap<String , Product> product_DB = prod_lib.getLibrary();
+                // HashMap<String , Product> seller_prod_DB = seller.getSellerProducts();
+
+                Document docs  = new Document("ProductID" ,cartProducts.getKey());
+
+                Document producDocument = client.getProductCollection().find().filter(docs).first();
+
+                if(producDocument.getInteger("Stock") != 0)
                 {
-                    int actualStock = product_DB.get(cartProducts.getKey()).getProd_stock();;
-                    product_DB.get(cartProducts.getKey()).setProd_stock( actualStock - cartProducts.getValue() );
-                    seller_prod_DB.get(cartProducts.getKey()).setProd_stock( actualStock - cartProducts.getValue() );
-                    if(actualStock - cartProducts.getValue() == 0)
-                    {
-                        product_DB.get(cartProducts.getKey()).setProd_Visibility(false);
-                        seller_prod_DB.get(cartProducts.getKey()).setProd_Visibility(false);
-                    }
+                    int actualStock = producDocument.getInteger("Stock");
+                    Document updateProdDoc = new  Document("$set" , new Document("Stock" , actualStock - cartProducts.getValue()));
+                    client.getProductCollection().updateOne(producDocument, updateProdDoc);
+                    // if(actualStock - cartProducts.getValue() == 0)
+                    // {
+                    //     product_DB.get(cartProducts.getKey()).setProd_Visibility(false);
+                    //     seller_prod_DB.get(cartProducts.getKey()).setProd_Visibility(false);
+                    // }
+                }
+                else
+                {
+                    System.out.println("The product is out of stock Consider buying another product...");
                 }
             }
             System.out.println("Changing the success variable...");

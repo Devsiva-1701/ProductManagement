@@ -19,7 +19,6 @@ public class Seller extends SellerProduct implements SellerInterface , SellerPro
     private String seller_password;
     private Long seller_PhNo;
     private ProductsLibrary prod_lib;
-    private RemovedProductsLibrary removed_prod_lib;
     private Product product;
     protected HashMap<String , Product> sellerProducts;
     private HashMap<String , Product> removedSellerProducts;
@@ -37,7 +36,6 @@ public class Seller extends SellerProduct implements SellerInterface , SellerPro
         this.prod_lib = prod_lib;
         this.sellerProducts = sellerProducts;
         this.primary_ID = primary_ID;
-        this.removed_prod_lib = removed_prod_lib;
         this.removedSellerProducts = removedSellerProducts;
         this.input = input;
     }
@@ -345,6 +343,9 @@ public class Seller extends SellerProduct implements SellerInterface , SellerPro
 
             Document filter  = new Document("ProductID" ,prod_ID);
             DeleteResult result = client.getProductCollection().deleteOne(filter);
+
+            System.out.println(result);
+            System.out.println("Product deleted successfully...");
 
             // sellerProducts.remove(prod_ID);
             

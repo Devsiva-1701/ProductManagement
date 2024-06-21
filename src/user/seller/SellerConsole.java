@@ -1,18 +1,11 @@
 package user.seller;
 
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileWriter;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.Scanner;
-
-import org.bson.codecs.jsr310.LocalTimeCodec;
-
-import com.mongodb.MongoClient;
-
 import Mongo.ClientConnect;
 import product.Product;
 import product.ProductCategories;
@@ -186,7 +179,7 @@ public class SellerConsole {
 
         String prod_name;
         int Primary_ID_1 = 1;
-        int Primary_ID_2 = 1;
+        // int Primary_ID_2 = 1;
         int prod_price;
         String prod_ID = current_seller.getSeller_ID();
         byte prod_rating = 0;

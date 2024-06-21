@@ -1,6 +1,5 @@
 package user.customer;
 
-import java.util.HashMap;
 import java.util.Scanner;
 
 import product.ProductsLibrary;
