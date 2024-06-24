@@ -11,7 +11,6 @@ import com.mongodb.client.MongoCursor;
 
 import Mongo.ClientConnect;
 import product.ProductsLibrary;
-import product.Product;
 
 public abstract class SellerProduct implements Serializable {
 
@@ -22,7 +21,7 @@ public abstract class SellerProduct implements Serializable {
         this.prod_lib = prod_lib;
     }
 
-    abstract void addProductToStore( Product product );
+    // abstract void addProductToStore( Product product );
     abstract void deleteProductFromStore( String prod_ID , ClientConnect client );
 
     public void viewProduct( String prod_ID , ClientConnect client )
@@ -58,7 +57,7 @@ public abstract class SellerProduct implements Serializable {
                 productList.add(product);
             }
 
-            products.iterator().forEachRemaining(productList::add);
+            // products.iterator().forEachRemaining(productList::add);
             productList.forEach(prod -> System.out.println(prod.toJson()));
 
             iterator.close();

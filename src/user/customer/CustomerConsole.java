@@ -4,30 +4,30 @@ import java.util.InputMismatchException;
 import java.util.Scanner;
 
 import Mongo.ClientConnect;
+import PostgreSQLClient.PostgreSQLClient;
 import product.ProductsLibrary;
-import user.RemovedUsers;
 import user.Users;
 import user.seller.Seller;
 
 public class CustomerConsole {
-    private RemovedUsers<Customer> removed_customer_DB;
     private Users<Customer> customer_DB;
     private Users<Seller> seller_DB;
     private Customer current_customer;
     private boolean customer_active = true;
     private ProductsLibrary prod_lib;
     ClientConnect clientConnect;
+    PostgreSQLClient postgresCLient;
 
-    public CustomerConsole( ClientConnect clientConnect,
-        RemovedUsers<Customer> removed_customer_DB , Users<Customer>  customer_DB, Users<Seller> seller_DB ,
+    public CustomerConsole( PostgreSQLClient postgresClient , ClientConnect clientConnect,
+             Users<Customer>  customer_DB, Users<Seller> seller_DB ,
      Customer current_customer , ProductsLibrary prod_lib )
     {
-        this.removed_customer_DB = removed_customer_DB;
         this.current_customer = current_customer;
         this.prod_lib = prod_lib;
         this.customer_DB = customer_DB;
         this.seller_DB = seller_DB;
         this.clientConnect = clientConnect;
+        this.postgresCLient = postgresClient;
     }
 
     public void start_customer_console()
@@ -37,7 +37,8 @@ public class CustomerConsole {
         {
             int option = 0;
             System.out.println(" Enter the options (number) : \n 1.View Products \n 2.View Cart \n 3.Add product to cart \n 4.Delete product from cart \n 5.Purchase Product \n 6.LogOut \n" + //
-                                " 7.Show PurchaseHistory \n 8.Delete Account");
+                                " 7.Show PurchaseHistory \n" ); 
+                                // 8.Delete Account");
             try{
                 option = input.nextInt();
                 input.nextLine();
@@ -53,7 +54,7 @@ public class CustomerConsole {
                     break;
                 
                 case 2:
-                    current_customer.viewCart(prod_lib);
+                    current_customer.viewCart();
                     break;
 
                 case 3:
@@ -63,9 +64,9 @@ public class CustomerConsole {
                     current_customer.setProd_lib(prod_lib);
                     System.err.println(seller_DB.getDB());
                     System.err.println(prod_lib.getLibrary());
-                    current_customer.setSeller(seller_DB.getDB().get(prod_lib.getLibrary().get(prod_ID_Add).getSellerID()) );
-                    current_customer.addProduct(prod_ID_Add);
-                    System.err.println("Seller after the process  : "+current_customer.getSeller());   
+                    // current_customer.setSeller(seller_DB.getDB().get(prod_lib.getLibrary().get(prod_ID_Add).getSellerID()) );
+                    current_customer.addProduct(prod_ID_Add , clientConnect);
+                    // System.err.println("Seller after the process  : "+current_customer.getSeller());   
                     break;
                     
                 case 4:
@@ -77,7 +78,7 @@ public class CustomerConsole {
 
                 case 5:
 
-                    current_customer.purchaseProduct( clientConnect );
+                    current_customer.purchaseProduct( clientConnect , postgresCLient );
                     break;
 
                 case 6:
@@ -133,15 +134,15 @@ public class CustomerConsole {
                     break;
 
                 case 7:
-                    current_customer.showPurchaseHistory();
+                    current_customer.showCustomerPurchaseHistory(postgresCLient);
                     break;
 
-                case 8:
-                    removed_customer_DB.addRemovedUser(current_customer.getCustomer_ID());
-                    customer_DB.deleteUser(current_customer.getCustomer_ID());
-                    System.out.println("Your Account has been deleted..");
-                    customer_active = false;
-                    break;
+                // case 8:
+                //     removed_customer_DB.addRemovedUser(current_customer.getCustomer_ID());
+                //     customer_DB.deleteUser(current_customer.getCustomer_ID());
+                //     System.out.println("Your Account has been deleted..");
+                //     customer_active = false;
+                //     break;
 
                 default:
                     System.out.println("Invalid Input...");

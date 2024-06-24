@@ -5,13 +5,23 @@ import product.Product;
 import product.ProductsLibrary;
 import user.seller.Seller;
 
+import java.sql.Statement;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
 import org.bson.Document;
 
+import com.mongodb.client.MongoCursor;
+import com.mongodb.client.model.Filters;
+
 import Mongo.ClientConnect;
+import PostgreSQLClient.PostgreSQLClient;
 
 public class Customer implements CustomerInterface , CustomerCartUpdate{
 
@@ -24,10 +34,10 @@ public class Customer implements CustomerInterface , CustomerCartUpdate{
     protected HashMap< String , Integer > customer_cart;
     private HashMap< String , HashMap<String , Integer>> purchase_history = new HashMap<String , HashMap<String ,Integer>>();
     private ProductsLibrary prod_lib;
-    private Seller seller;
-    ClientConnect clientConnect;
+    // private Seller seller;
+    String cartID;
 
-    public Customer(ClientConnect clientConnect ,String customer_name , String customer_password , String customer_address ,
+    public Customer(String customer_name , String customer_password , String customer_address ,
                     HashMap<String , Integer> customer_cart , String customer_ID , int primary_ID , String customer_PhNo )
     {
         this.customer_name = customer_name;
@@ -37,7 +47,8 @@ public class Customer implements CustomerInterface , CustomerCartUpdate{
         this.customer_ID = customer_ID;
         this.primary_ID = primary_ID;
         this.customer_PhNo = customer_PhNo;
-        this.clientConnect = clientConnect;
+        cartID= "C"+customer_ID+"R";
+        
     }
 
 
@@ -82,14 +93,33 @@ public class Customer implements CustomerInterface , CustomerCartUpdate{
         return result;
     }
 
-    public String getCustomerPurchaseHistoryString()
+    public void showCustomerPurchaseHistory( PostgreSQLClient postgresClient )
     {
-        String result = "";
-        for(Map.Entry<String , Integer> customer_cart_entry : customer_cart.entrySet() )
-        {
-            result += customer_cart_entry.getKey()+","+String.valueOf(customer_cart_entry.getValue());
+        String queryPurchaseHistory = "SELECT * FROM orders";
+
+        try {
+            
+            Statement ph = postgresClient.getConnectInstance().createStatement();
+
+            ResultSet result = ph.executeQuery(queryPurchaseHistory);
+
+            System.out.println("Purchase history : ");
+
+            while (result.next()) {
+                System.out.println(
+                    "--------------------------------"+
+                    "\nOrder ID : "+result.getString("orderid")+
+                    "\nCart ID : "+result.getString("cartid")+
+                    "\nNumber of Products : "+result.getString("productcount")+
+                    "\nTotal cost : "+result.getString("totalcost")+
+                    "\nTotal Quantity : "+result.getString("totalquantity")
+                );
+            }
+
+        } catch (Exception e) {
+            // TODO: handle exception
         }
-        return result;
+
     }
 
     public String getSellerDetailsFile()
@@ -110,35 +140,41 @@ public class Customer implements CustomerInterface , CustomerCartUpdate{
         return result;
     }
 
-    public void showPurchaseHistory()
-    {
-        String final_str = "";
-        for(Map.Entry<String , HashMap<String , Integer>> historyMap_entry : purchase_history.entrySet() )
-        {
+    // public void showPurchaseHistory()
+    // {
+    //     String final_str = "";
+    //     for(Map.Entry<String , HashMap<String , Integer>> historyMap_entry : purchase_history.entrySet() )
+    //     {
             
-               final_str += historyMap_entry.getKey()+" : { \n" + MapToString(historyMap_entry.getValue()) + " } ";
+    //            final_str += historyMap_entry.getKey()+" : { \n" + MapToString(historyMap_entry.getValue()) + " } ";
             
-        }
+    //     }
 
-        System.out.println(final_str); 
+    //     System.out.println(final_str); 
 
-        // System.out.println(purchase_history.values());
+    //     // System.out.println(purchase_history.values());
 
-    }
+    // }
 
     @Override
-    public void addProduct(String prod_ID) {
+    public void addProduct(String prod_ID , ClientConnect mongoClient) {
         Scanner input = new Scanner(System.in);
         int quantity = 0;
         boolean validValue = false;
         try {
-            Product product = prod_lib.getLibrary().get(prod_ID);
+            // Product product = prod_lib.getLibrary().get(prod_ID);
+
+            Document product = mongoClient.getProductCollection().find(Filters.eq("ProductID" , prod_ID)).first();
+
+            
+
+
             while(!validValue)
             {
                 System.out.println("Enter the quantity of products : ");
                 quantity = input.nextInt();
-                if(customer_cart.containsKey(product.getProd_id())) quantity += customer_cart.get(product.getProd_id());
-                if (quantity > product.getProd_stock()) System.out.println("The value must within the stock quantity of this product this is also adds with the existing product count ");
+                if(customer_cart.containsKey(prod_ID)) quantity += customer_cart.get(prod_ID);
+                if (quantity > product.getLong("Stock")) System.out.println("The value must within the stock quantity of this product this is also adds with the existing product count ");
                 else validValue = true; 
             }
 
@@ -146,9 +182,9 @@ public class Customer implements CustomerInterface , CustomerCartUpdate{
 
                 addToCustomeCart(product , quantity);
 
-                    System.err.println(customer_cart);
+                System.err.println(customer_cart);
 
-                System.out.println("Product : " + product.getProd_name() +" added to your cart...");
+                System.out.println("Product : " + (product.getString("ProductName")) +" added to your cart...");
 //                input.close();
                 
             } catch (Exception e) {
@@ -163,10 +199,10 @@ public class Customer implements CustomerInterface , CustomerCartUpdate{
         
     }
 
-    public void addToCustomeCart( Product product , int quantity )
+    public void addToCustomeCart( Document product , int quantity )
     {
-        customer_cart.put( (product.getProd_id()) ,
-                    customer_cart.getOrDefault(product.getProd_id()+getCustomer_PhNo() , 0) + quantity
+        customer_cart.put( (product.getString("ProductID")) ,
+                    customer_cart.getOrDefault((product.getString("ProductID"))+getCustomer_PhNo() , 0) + quantity
                     );
     }
 
@@ -235,19 +271,19 @@ public class Customer implements CustomerInterface , CustomerCartUpdate{
     }
 
 
-    public void setSeller(Seller prod_seller) {
-        System.err.println("The seller inside the customer : "+seller);
-        seller = prod_seller;
-    }
+    // public void setSeller(Seller prod_seller) {
+    //     System.err.println("The seller inside the customer : "+seller);
+    //     seller = prod_seller;
+    // }
 
-    public Seller getSeller()
-    {
-        return seller;
-    }
+    // public Seller getSeller()
+    // {
+    //     return seller;
+    // }
 
 
     @Override
-    public void viewCart( ProductsLibrary prod_lib) {
+    public void viewCart() {
 
         try{
             if(customer_cart.isEmpty()) {
@@ -258,7 +294,6 @@ public class Customer implements CustomerInterface , CustomerCartUpdate{
                 for( Map.Entry<String , Integer> product : customer_cart.entrySet())
             {
                 System.out.println("Product_id : "+product.getKey()+"\n"+
-                        "Product_Name : " + prod_lib.getProductName( product.getKey() )+"\n"+
                         "Number of this items in the cart : " + product.getValue()
                 );
             }
@@ -279,26 +314,76 @@ public class Customer implements CustomerInterface , CustomerCartUpdate{
         return this.customer_cart;
     }
 
-    public void purchaseProduct( ClientConnect client )
+    public void purchaseProduct( ClientConnect client , PostgreSQLClient postgresClient )
     {
         boolean success = false;
+        String queryAddOrderitems = "INSERT INTO order_items (orderid , productid , quantity , price)"+
+                                "VALUES ( ? , ? , ? , ?)"; 
+        String queryAddOrder = "INSERT INTO orders (orderid , cartid , productcount , totalcost , totalquantity)"+
+                                "VALUES ( ? , ? , ? , ? , ?)"; 
+
+        String queryUpdateOrders = "UPDATE orders SET productcount = ? , totalcost = ? , totalquantity = ? WHERE orderid = ?";
 
         try {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("mm-ss-SS");
             if(customer_cart.isEmpty()) throw new Exception();
+            Long totalCost = 0l;
+            Long totalQuantity = 0l;
+            Long productCount = 0l;
+            String time = formatter.format(LocalTime.now());
+            String orderID = "O"+time+"R";
+            PreparedStatement st;
+            try {
+                st = postgresClient.getConnectInstance().prepareStatement(queryAddOrder);
+                System.out.println("Order ID in orderitems");
+                st.setString(1, orderID);
+                st.setString(2, cartID);
+                st.setLong(3, 0);
+                st.setLong(4, 0);
+                st.setLong(5, 0);
+                
+
+                st.executeUpdate();
+                System.out.println("First order added/.......");
+                // st.setLong(3, null);
+            } catch (SQLException sqlException) {
+                System.err.println("Purchase Failed code - 1F");
+            }
+
+            
+
             for( Map.Entry<String , Integer> cartProducts : customer_cart.entrySet()  )
             {
-                // HashMap<String , Product> product_DB = prod_lib.getLibrary();
-                // HashMap<String , Product> seller_prod_DB = seller.getSellerProducts();
 
                 Document docs  = new Document("ProductID" ,cartProducts.getKey());
 
                 Document producDocument = client.getProductCollection().find().filter(docs).first();
 
-                if(producDocument.getInteger("Stock") != 0)
+                Long stock = producDocument.getLong("Stock");
+                if( stock > 0 || cartProducts.getValue() <= stock)
                 {
-                    int actualStock = producDocument.getInteger("Stock");
-                    Document updateProdDoc = new  Document("$set" , new Document("Stock" , actualStock - cartProducts.getValue()));
+                    Long price = producDocument.getLong("Price");
+                    Long actualStock = producDocument.getLong("Stock");
+                    Document updateProdDoc = new  Document("$set" , new Document("Stock" , (actualStock - cartProducts.getValue())));
                     client.getProductCollection().updateOne(producDocument, updateProdDoc);
+
+                    st = postgresClient.getConnectInstance().prepareStatement(queryAddOrderitems);
+                    System.out.println("Order ID in orderitems");
+                    st.setString(1, orderID);
+                    st.setString(2, cartProducts.getKey());
+                    st.setLong(3, cartProducts.getValue());
+                    st.setLong(4, price);
+                    
+
+                    st.executeUpdate();
+                    
+                    totalCost = price * cartProducts.getValue();
+                    totalQuantity += cartProducts.getValue();
+                    productCount++;
+
+
+
+
                     // if(actualStock - cartProducts.getValue() == 0)
                     // {
                     //     product_DB.get(cartProducts.getKey()).setProd_Visibility(false);
@@ -310,6 +395,14 @@ public class Customer implements CustomerInterface , CustomerCartUpdate{
                     System.out.println("The product is out of stock Consider buying another product...");
                 }
             }
+            st = postgresClient.getConnectInstance().prepareStatement(queryUpdateOrders);
+            st.setLong(1, productCount);
+            st.setLong(2, totalCost);
+            st.setLong(3, totalQuantity);
+            st.setString(4, orderID);
+
+            st.executeUpdate();
+
             System.out.println("Changing the success variable...");
             success = true;
         } catch (Exception e) {
@@ -332,22 +425,22 @@ public class Customer implements CustomerInterface , CustomerCartUpdate{
 
     @Override
     public void viewProducts(ProductsLibrary prod_lib) {
-        try{
-            if( prod_lib == null ) throw new Exception("No Products in the store...");
-            System.out.println(prod_lib.getLibrary());
-            for( Map.Entry<String , Product> product_map :  prod_lib.getLibrary().entrySet() )
-            {
-                if(product_map.getValue().getProd_visiblity())
-                {
-                    System.out.println(product_map.getValue().getDetails());
-                }
+        // try{
+        //     if( prod_lib == null ) throw new Exception("No Products in the store...");
+        //     System.out.println(prod_lib.getLibrary());
+        //     for( Map.Entry<String , Product> product_map :  prod_lib.getLibrary().entrySet() )
+        //     {
+        //         if(product_map.getValue().getProd_visiblity())
+        //         {
+        //             System.out.println(product_map.getValue().getDetails());
+        //         }
 
-            }
-        }
-        catch(Exception e)
-        {
-            System.err.println("No products are available...");
-        }
+        //     }
+        // }
+        // catch(Exception e)
+        // {
+        //     System.err.println("No products are available...");
+        // }
 
     }
 

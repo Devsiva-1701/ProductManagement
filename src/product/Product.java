@@ -6,18 +6,18 @@ public class Product implements Serializable {
 
     private int Primary_ID;
     private String prod_name;
-    private int prod_price;
+    private Long prod_price;
     private String prod_id;
     private byte prod_rating;
-    private int prod_stock;
+    private Long prod_stock;
     private String seller;
     private String sellerID;
     private ProductCategories category;
     private boolean isVisible;
 
 
-    public Product(int Primary_ID , String prod_name, int prod_price, String prod_id,
-                   byte prod_rating, int prod_stock, String seller, String sellerID ,
+    public Product(int Primary_ID , String prod_name, Long prod_price, String prod_id,
+                   byte prod_rating, Long prod_stock, String seller, String sellerID ,
                    ProductCategories category , boolean isVisible) {
 
         this.Primary_ID = Primary_ID;
@@ -44,7 +44,7 @@ public class Product implements Serializable {
         return prod_name;
     }
 
-    public int getProd_price() {
+    public Long getProd_price() {
         return prod_price;
     }
 
@@ -52,7 +52,7 @@ public class Product implements Serializable {
         return prod_id;
     }
 
-    public void setProd_price(int prod_price) {
+    public void setProd_price(Long prod_price) {
         this.prod_price = prod_price;
     }
 
@@ -65,7 +65,7 @@ public class Product implements Serializable {
         this.isVisible = isVisible;
     }
 
-    public void setProd_stock(int prod_stock) {
+    public void setProd_stock(Long prod_stock) {
         this.prod_stock = prod_stock;
     }
 
@@ -78,7 +78,7 @@ public class Product implements Serializable {
         return isVisible;
     }
 
-    public int getProd_stock() {
+    public Long getProd_stock() {
         return prod_stock;
     }
 

@@ -1,6 +1,7 @@
 {
     "java.project.referencedLibraries": [
         "lib/**/*.jar",
-        "/Users/devsiva/Downloads/mongo-java-driver-3.11.2.jar"
+        "/Users/devsiva/Downloads/mongo-java-driver-3.11.2.jar",
+        "/Users/devsiva/Downloads/postgresql-42.7.3.jar"
     ]
 }

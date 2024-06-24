@@ -2,13 +2,10 @@ package user.seller;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.Scanner;
 import Mongo.ClientConnect;
 import product.Product;
-import product.ProductCategories;
 import product.ProductsLibrary;
 import product.RemovedProductsLibrary;
 import user.RemovedUsers;
@@ -87,7 +84,7 @@ public class SellerConsole {
                     break;
 
                 case 6:
-                    setProduct(input);
+                    current_seller.setProduct(input , client);
                     break;
 
                 case 7:
@@ -174,67 +171,67 @@ public class SellerConsole {
 
     // This will create the Product
 
-    public void setProduct( Scanner input )
-    {
+    // public void setProduct( Scanner input )
+    // {
 
-        String prod_name;
-        int Primary_ID_1 = 1;
-        // int Primary_ID_2 = 1;
-        int prod_price;
-        String prod_ID = current_seller.getSeller_ID();
-        byte prod_rating = 0;
-        int prod_stock;
-        ProductCategories category = ProductCategories.Electronics;
-        short prod_category_16Bit;
-        boolean valid_category =  false;
-        ProductCategories[] category_list = ProductCategories.values();
+    //     String prod_name;
+    //     int Primary_ID_1 = 1;
+    //     // int Primary_ID_2 = 1;
+    //     int prod_price;
+    //     String prod_ID = current_seller.getSeller_ID();
+    //     byte prod_rating = 0;
+    //     int prod_stock;
+    //     ProductCategories category = ProductCategories.Electronics;
+    //     short prod_category_16Bit;
+    //     boolean valid_category =  false;
+    //     ProductCategories[] category_list = ProductCategories.values();
 
-        System.out.println("Enter the product Name : ");
-        prod_name = input.nextLine();
-        prod_name = input.nextLine();
-        System.out.println("Enter the price : ");
-        prod_price = input.nextInt();
-        System.out.println("Enter the Product stock : ");
-        prod_stock = input.nextInt();
-        while(!valid_category)
-        {
-            System.out.println("Enter the category of this product (Enter the number) : ");
-            int productCount = 1;
-            for( ProductCategories prod_category : category_list )
-            {
-                System.out.println( String.valueOf(productCount)+". "+prod_category );
-                productCount++;
-            }
-            prod_category_16Bit = input.nextShort();
-            if(!(prod_category_16Bit > ProductCategories.values().length))
-            {
-                category = category_list[prod_category_16Bit-1];
-                valid_category = true;
-            }
-            else{
-                System.out.println("Enter the valid category...");
-            }
-        }
+    //     System.out.println("Enter the product Name : ");
+    //     prod_name = input.nextLine();
+    //     prod_name = input.nextLine();
+    //     System.out.println("Enter the price : ");
+    //     prod_price = input.nextInt();
+    //     System.out.println("Enter the Product stock : ");
+    //     prod_stock = input.nextInt();
+    //     while(!valid_category)
+    //     {
+    //         System.out.println("Enter the category of this product (Enter the number) : ");
+    //         int productCount = 1;
+    //         for( ProductCategories prod_category : category_list )
+    //         {
+    //             System.out.println( String.valueOf(productCount)+". "+prod_category );
+    //             productCount++;
+    //         }
+    //         prod_category_16Bit = input.nextShort();
+    //         if(!(prod_category_16Bit > ProductCategories.values().length))
+    //         {
+    //             category = category_list[prod_category_16Bit-1];
+    //             valid_category = true;
+    //         }
+    //         else{
+    //             System.out.println("Enter the valid category...");
+    //         }
+    //     }
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("mm-ss-SS");
+    //     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("mm-ss-SS");
 
-         LocalTime currentTime = LocalTime.now();
+    //      LocalTime currentTime = LocalTime.now();
 
-        Product product = new Product( Primary_ID_1 , prod_name , 
-        prod_price ,(prod_ID+"P"+currentTime.format(formatter)),
-        prod_rating , prod_stock , current_seller.getName() , current_seller.getSeller_ID() , category , true
-        );
+    //     Product product = new Product( Primary_ID_1 , prod_name , 
+    //     prod_price ,(prod_ID+"P"+currentTime.format(formatter)),
+    //     prod_rating , prod_stock , current_seller.getName() , current_seller.getSeller_ID() , category , true
+    //     );
 
-        client.insertIntoCollection(product);
-        current_seller.addProductToStore(product);
-        current_seller.addSellerProducts();
+    //     client.insertIntoCollection(product);
+    //     current_seller.addProductToStore(product);
+    //     current_seller.addSellerProducts();
 
-        System.out.println("Product Added to the Store Successfully...");
-        System.out.println(prod_lib.getLibrary());
+    //     System.out.println("Product Added to the Store Successfully...");
+    //     System.out.println(prod_lib.getLibrary());
         
 
 
-    } 
+    // } 
 
 }
 

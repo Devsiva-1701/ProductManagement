@@ -16,6 +16,15 @@
             "request": "launch",
             "mainClass": "Main",
             "projectName": "ProductManagement_f5277c63"
+        },
+        {
+            "type": "java",
+            "name": "App",
+            "request": "launch",
+            "mainClass": "com.prod_management.App",
+            "projectName": "prod_manage",
+            "console": "integratedTerminal",
+            "preLaunchTask": "clearTerminal"
         }
     ]
 }

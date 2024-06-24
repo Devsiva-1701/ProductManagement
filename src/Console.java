@@ -7,8 +7,8 @@ import java.util.Map;
 import java.util.Scanner;
 
 import Mongo.ClientConnect;
+import PostgreSQLClient.PostgreSQLClient;
 import product.Product;
-import product.ProductCategories;
 import product.ProductsLibrary;
 import product.RemovedProductsLibrary;
 import user.RemovedUsers;
@@ -32,9 +32,11 @@ public class Console {
     public static transient Scanner input = new Scanner(System.in);
     File file;
     ClientConnect clientConnect;
+    PostgreSQLClient postgresCLient;
 
-    public Console( ClientConnect clientConnect ) {
+    public Console( ClientConnect clientConnect , PostgreSQLClient postgresCLient ) {
         this.clientConnect = clientConnect;
+        this.postgresCLient = postgresCLient;
         running = true;
         clientConnect.insertCategoriesIntoCollection();
     }
@@ -42,12 +44,11 @@ public class Console {
     void verifyFile()
     {
         try {
-                file = new File("products.txt");
-                if(!file.exists())file.createNewFile();
-                else  fetchFromFileProducts();
-                file = new File("removed_products.txt");
-                if(!file.exists())file.createNewFile();
-                else  fetchFromFileRemovedProducts();
+                // file = new File("products.txt");
+                // if(!file.exists())file.createNewFile();
+                // else  fetchFromFileProducts();
+                // file = new File("removed_products.txt");
+                // if(!file.exists())file.createNewFile();
                 file = new File("seller.txt");
                 if(!file.exists())file.createNewFile();
                 else fetchFromFileSellers();
@@ -60,64 +61,35 @@ public class Console {
         }
     }
 
-    void fetchFromFileProducts()
-    {
-        try( BufferedReader reader = new BufferedReader(new FileReader("products.txt")) )
-        {
-            String line;
-            while((line = reader.readLine()) != null)
-            {
-                String[] part_prod = line.split(",");
-                boolean visiblity;
-                if(part_prod[9].equals("true"))
-                {
-                    visiblity = true;
-                }
-                else{
-                    visiblity  = false;
-                }
-                prod_library.addProductToLibrary(
-                    new Product(Integer.parseInt(part_prod[0]), part_prod[1], Integer.parseInt(part_prod[2]), 
-                    part_prod[3], Byte.parseByte(part_prod[4]), Integer.parseInt(part_prod[5]), part_prod[6], part_prod[7] , 
-                    ProductCategories.valueOf(part_prod[8]), visiblity));
-            }
+    // void fetchFromFileProducts()
+    // {
+    //     try( BufferedReader reader = new BufferedReader(new FileReader("products.txt")) )
+    //     {
+    //         String line;
+    //         while((line = reader.readLine()) != null)
+    //         {
+    //             String[] part_prod = line.split(",");
+    //             boolean visiblity;
+    //             if(part_prod[9].equals("true"))
+    //             {
+    //                 visiblity = true;
+    //             }
+    //             else{
+    //                 visiblity  = false;
+    //             }
+    //             prod_library.addProductToLibrary(
+    //                 new Product(Integer.parseInt(part_prod[0]), part_prod[1], Integer.parseInt(part_prod[2]), 
+    //                 part_prod[3], Byte.parseByte(part_prod[4]), Integer.parseInt(part_prod[5]), part_prod[6], part_prod[7] , 
+    //                 ProductCategories.valueOf(part_prod[8]), visiblity));
+    //         }
 
-        }
-        catch( Exception file_exception )
-        {
-            System.err.println(file_exception);
-        }
+    //     }
+    //     catch( Exception file_exception )
+    //     {
+    //         System.err.println(file_exception);
+    //     }
         
-    }
-
-    void fetchFromFileRemovedProducts()
-    {
-        try( BufferedReader reader = new BufferedReader(new FileReader("removed_products.txt")) )
-        {
-            String line;
-            while((line = reader.readLine()) != null)
-            {
-                String[] part_prod = line.split(",");
-                boolean visiblity;
-                if(part_prod[8].equals("true"))
-                {
-                    visiblity = true;
-                }
-                else{
-                    visiblity  = false;
-                }
-                removed_prod_lib.addProductToLibrary(
-                    new Product(Integer.parseInt(part_prod[0]), part_prod[1], Integer.parseInt(part_prod[2]), 
-                    part_prod[3], Byte.parseByte(part_prod[4]), Integer.parseInt(part_prod[5]), part_prod[6], part_prod[7] ,
-                    ProductCategories.valueOf(part_prod[8]), visiblity));
-            }
-
-        }
-        catch( Exception file_exception )
-        {
-            System.err.println(file_exception);
-        }
-    }
+    // }
 
     void fetchFromFileSellers()
     {
@@ -245,11 +217,11 @@ public class Console {
 
         switch (user) {
             case "customer":
-                String customer_name;
-                String customer_pass;
-                String customer_address;
-                Long customer_phNo;
-                String customer_ID;
+                String customer_name ="";
+                String customer_pass = "";
+                String customer_address = "";
+                Long customer_phNo = 0l;
+                String customer_ID = "";
                 int CustomerPrimaryID = 0;
 
                 if (removedCustomer_DB.getDB().isEmpty()) {
@@ -271,19 +243,28 @@ public class Console {
                     }
                 }
 
-                System.out.println("Enter your Name : ");
-                customer_name = input.nextLine();
-                customer_name = input.nextLine();
-                System.out.println("Enter the Password : ");
-                customer_pass = input.nextLine();
-                System.out.println("Enter the Address : ");
-                customer_address = input.nextLine();
-                System.out.println("Enter the Phone Number : ");
-                customer_phNo = input.nextLong();
+                try {
+
+                    System.out.println("Enter your Name : ");
+                    customer_name = input.nextLine();
+                    customer_name = input.nextLine();
+                    System.out.println("Enter the Password : ");
+                    customer_pass = input.nextLine();
+                    System.out.println("Enter the Address : ");
+                    customer_address = input.nextLine();
+                    System.out.println("Enter the Phone Number : ");
+                    customer_phNo = input.nextLong();
+                    
+                } catch (Exception InputException) {
+                    System.err.println("Input Error...");
+                    break;
+                }
+
+                
 
                 customer_ID = (customer_phNo.toString() + customer_name + String.valueOf(CustomerPrimaryID));
 
-                customer_DB.setUser(new Customer( clientConnect , customer_name, customer_pass, customer_address, new HashMap<String, Integer>(), customer_ID, CustomerPrimaryID , String.valueOf(customer_phNo)));
+                customer_DB.setUser(new Customer( customer_name, customer_pass, customer_address, new HashMap<String, Integer>(), customer_ID, CustomerPrimaryID , String.valueOf(customer_phNo)));
 
                 if (customer_DB.existingUser(customer_ID)) {
                     System.out.println("User already exists...");
@@ -295,10 +276,10 @@ public class Console {
                 break;
 
             case "seller":
-                String seller_name;
-                String seller_pass;
-                Long seller_phNo;
-                String seller_ID;
+                String seller_name = "";
+                String seller_pass = "";
+                Long seller_phNo = 0l;
+                String seller_ID = "";
                 int SellerPrimary_ID = 0;
 
                 if (removedSeller_DB.getDB().isEmpty()) {
@@ -320,12 +301,21 @@ public class Console {
                     }
                 }
 
-                System.out.println("Enter your Name : ");
-                seller_name = input.nextLine();
-                System.out.println("Enter the Password : ");
-                seller_pass = input.nextLine();
-                System.out.println("Enter the Phone Number : ");
-                seller_phNo = input.nextLong();
+                try {
+
+                    System.out.println("Enter your Name : ");
+                    seller_name = input.nextLine();
+                    System.out.println("Enter the Password : ");
+                    seller_pass = input.nextLine();
+                    System.out.println("Enter the Phone Number : ");
+                    seller_phNo = input.nextLong();
+                    
+                } catch (Exception InputException) {
+                    System.err.println("Input Missmatch...");
+                    break;
+                }
+
+                
 
                 seller_ID = (seller_phNo.toString() + seller_name + String.valueOf(SellerPrimary_ID));
 
@@ -349,13 +339,21 @@ public class Console {
 
         switch (user) {
             case "customer":
-                String customerID;
-                String customer_pass;
-                System.out.println("Enter the user ID : ");
-                customerID = input.nextLine();
-                customerID = input.nextLine();
-                System.out.println("Enter your Password : ");
-                customer_pass = input.nextLine();
+                String customerID = "";
+                String customer_pass = "";
+
+                try {
+
+                    System.out.println("Enter the user ID : ");
+                    customerID = input.nextLine();
+                    customerID = input.nextLine();
+                    System.out.println("Enter your Password : ");
+                    customer_pass = input.nextLine();
+                    
+                } catch (Exception InputException) {
+                    System.err.println("Input Missmatch...");
+                }
+                
 
                 currentCustomer = customer_DB.getUser(customerID);
 
@@ -365,7 +363,7 @@ public class Console {
                     System.out.println("Incorrect Password...");
                 } else {
                     System.out.println("Login In Successful...");
-                    CustomerConsole customerConsole = new CustomerConsole(clientConnect, removedCustomer_DB, customer_DB, 
+                    CustomerConsole customerConsole = new CustomerConsole( postgresCLient ,clientConnect, customer_DB, 
                     seller_DB, currentCustomer, prod_library);
                     customerConsole.start_customer_console();
                     running = false;
@@ -373,12 +371,21 @@ public class Console {
                 break;
 
             case "seller":
-                String sellerID;
-                String seller_pass;
-                System.out.println("Enter the user ID : ");
-                sellerID = input.nextLine();
-                System.out.println("Enter your Password : ");
-                seller_pass = input.nextLine();
+                String sellerID = "";
+                String seller_pass = "";
+
+                try {
+
+                    System.out.println("Enter the user ID : ");
+                    sellerID = input.nextLine();
+                    System.out.println("Enter your Password : ");
+                    seller_pass = input.nextLine();
+                    
+                } catch (Exception InputException) {
+                    System.err.println("Input Missmatch...");
+                    break;
+                }
+                
 
                 currentSeller = seller_DB.getUser(sellerID);
 

@@ -1,5 +1,7 @@
 package user.seller;
 
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
@@ -314,27 +316,27 @@ public class Seller extends SellerProduct implements SellerInterface , SellerPro
 
 
 
-    @Override
-    void addProductToStore( Product product ) {
-        this.product = product;
-        try {
+    // @Override
+    // void addProductToStore( Product product ) {
+    //     this.product = product;
+    //     try {
 
-            HashMap<String , Product> prod_Map =  prod_lib.getLibrary();
-            if( !prod_Map.containsKey(product.getProd_id()) )
-            {
-                prod_lib.addProductToLibrary(product);
-                sellerProducts.put(product.getProd_id(), product);
-            }
-            else
-            {
-                System.out.println("Product already exists...");
-            }
+    //         HashMap<String , Product> prod_Map =  prod_lib.getLibrary();
+    //         if( !prod_Map.containsKey(product.getProd_id()) )
+    //         {
+    //             prod_lib.addProductToLibrary(product);
+    //             sellerProducts.put(product.getProd_id(), product);
+    //         }
+    //         else
+    //         {
+    //             System.out.println("Product already exists...");
+    //         }
             
-        } catch (NullPointerException lib_null) {
-            System.err.println("No Products avail in the store...");
-        }
+    //     } catch (NullPointerException lib_null) {
+    //         System.err.println("No Products avail in the store...");
+    //     }
         
-    }
+    // }
 
     @Override
     void deleteProductFromStore(String prod_ID , ClientConnect client) {
@@ -355,4 +357,67 @@ public class Seller extends SellerProduct implements SellerInterface , SellerPro
     
         
     }
+
+    public void setProduct( Scanner input , ClientConnect client )
+    {
+
+        String prod_name;
+        int Primary_ID_1 = 1;
+        // int Primary_ID_2 = 1;
+        Long prod_price;
+        String prod_ID = getSeller_ID();
+        byte prod_rating = 0;
+        Long prod_stock;
+        ProductCategories category = ProductCategories.Electronics;
+        short prod_category_16Bit;
+        boolean valid_category =  false;
+        ProductCategories[] category_list = ProductCategories.values();
+
+        System.out.println("Enter the product Name : ");
+        prod_name = input.nextLine();
+        prod_name = input.nextLine();
+        System.out.println("Enter the price : ");
+        prod_price = input.nextLong();
+        System.out.println("Enter the Product stock : ");
+        prod_stock = input.nextLong();
+        while(!valid_category)
+        {
+            System.out.println("Enter the category of this product (Enter the number) : ");
+            int productCount = 1;
+            for( ProductCategories prod_category : category_list )
+            {
+                System.out.println( String.valueOf(productCount)+". "+prod_category );
+                productCount++;
+            }
+            prod_category_16Bit = input.nextShort();
+            if(!(prod_category_16Bit > ProductCategories.values().length))
+            {
+                category = category_list[prod_category_16Bit-1];
+                valid_category = true;
+            }
+            else{
+                System.out.println("Enter the valid category...");
+            }
+        }
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("mm-ss-SS");
+
+         LocalTime currentTime = LocalTime.now();
+
+        Product product = new Product( Primary_ID_1 , prod_name , 
+        prod_price ,(prod_ID+"P"+currentTime.format(formatter)),
+        prod_rating , prod_stock , getName() , getSeller_ID() , category , true
+        );
+
+        this.product = product;
+
+        client.insertIntoCollection(product);
+        addSellerProducts();
+
+        System.out.println("Product Added to the Store Successfully...");
+        System.out.println(prod_lib.getLibrary());
+        
+
+
+    } 
 }
